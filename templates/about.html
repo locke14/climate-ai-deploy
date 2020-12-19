@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+.demo-card-wide.mdl-card {
+  width: 512px;
+}
+.demo-card-wide > .mdl-card__title1 {
+  color: #fff;
+  text-shadow: 2px 2px #000;
+  height: 176px;
+  background: url('static/deep-learning.jpg') center / cover;
+}
+.demo-card-wide > .mdl-card__menu {
+  color: #fff;
+}
+
+.wh {
+background-color: #fff;
+}
+</style>
+
+<div class="mdl-grid">
+    <div class="mdl-card mdl-cell mdl-cell--12-col mdl-shadow--2dp">
+        <div class="demo-card-wide mdl-card mdl-shadow--2dp mdl-cell--middle">
+            <div class="mdl-card__title1">
+                <h2 class="mdl-card__title-text">
+                </h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+                Transfer learning using ResNet50
+            </div>
+            <div class="mdl-card__actions mdl-card--border">
+                <a class="mdl-button mdl-button--accent mdl-js-button mdl-js-ripple-effect"
+                   href="https://en.wikipedia.org/wiki/Transfer_learning" target="_blank">
+                    Transfer Learning
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
