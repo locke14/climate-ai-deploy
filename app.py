@@ -10,6 +10,11 @@ from tensorflow.keras import backend as k
 from tensorflow.keras.models import load_model
 import numpy as np
 
+import tensorflow as tf
+
+tf.config.threading.set_intra_op_parallelism_threads(1)
+tf.config.threading.set_inter_op_parallelism_threads(1)
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
@@ -82,10 +87,11 @@ def f1(y_true, y_pred):
 
 
 try:
-    model = load_model('trained_model.h5',
-                       custom_objects={'f1': f1,
-                                       'recall': recall,
-                                       'precision': precision})
+    with tf.device('/CPU:0'):
+        model = load_model('trained_model.h5',
+                           custom_objects={'f1': f1,
+                                           'recall': recall,
+                                           'precision': precision})
     err = 'Model loaded successfully'
 except OSError as e:
     model = None
