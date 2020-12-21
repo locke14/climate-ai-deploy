@@ -107,8 +107,8 @@ def predict(input_file):
                     10: 'Soiling',
                     11: 'Vegetation'}
 
-    im = load_img(input_file, color_mode='rgb')
-    arr = img_to_array(im).reshape((1, 40, 32, 3))
+    im = load_img(input_file, color_mode='grayscale', target_size=(40, 24))
+    arr = img_to_array(im).reshape((1, 40, 24, 1))
     idx = np.argmax(model.predict(arr), axis=-1)
     return idx_to_class[idx[0]]
 
