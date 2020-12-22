@@ -18,7 +18,6 @@ app.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png']
 
-# evaluator = ModelEvaluator(os.path.join(basedir, 'model.h5'), (1, 40, 32, 3), 'rgb')
 
 CLASSES = [('No-Anomaly',
             ' Nominal solar module',
@@ -82,7 +81,7 @@ def f1(y_true, y_pred):
 
 
 try:
-    model = load_model('trained_model.h5',
+    model = load_model('model.h5',
                        custom_objects={'f1': f1,
                                        'recall': recall,
                                        'precision': precision})
