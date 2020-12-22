@@ -1,3 +1,4 @@
+import io
 import os
 
 from flask import Flask, render_template, redirect, url_for, request
@@ -96,6 +97,14 @@ except OSError as e:
            f'Search directory contents: {os.listdir(basedir)}', False)
 
 
+def get_model_summary():
+    stream = io.StringIO()
+    model.summary(print_fn=lambda x: stream.write(x + '\n'))
+    summary_string = stream.getvalue()
+    stream.close()
+    return summary_string
+
+
 def predict(input_file):
     idx_to_class = {0: 'Cell',
                     1: 'Cell-Multi',
@@ -126,13 +135,19 @@ def home():
     global last_uploaded_file, last_uploaded_url, last_uploaded_prediction, err
     form = UploadForm()
     if request.method == 'POST':
+        if len(os.listdir(app.config['UPLOADED_PHOTOS_DEST'])) > 24:
+            err = (f'Exceeded number of files limit of 24. Delete some below and try again', False)
+            last_uploaded_file = ''
+            last_uploaded_url = ''
+            last_uploaded_prediction = ''
+            return redirect(url_for('home'))
         if request.files['file'].filename.lower().endswith(('.jpg', '.png')):
             request.files['file'].save(os.path.join(app.config['UPLOADED_PHOTOS_DEST'], request.files['file'].filename))
             last_uploaded_file = request.files['file'].filename
             last_uploaded_url = photos.url(last_uploaded_file)
             last_uploaded_prediction = predict(os.path.join(app.config['UPLOADED_PHOTOS_DEST'], last_uploaded_file))
             err = (f'Successfully predicted file: {request.files["file"].filename}', True)
-            return redirect(url_for('upload_file'))
+            return redirect(url_for('home'))
         else:
             err = (f'Invalid upload file: {request.files["file"].filename}', False)
 
@@ -157,7 +172,7 @@ def home():
 
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    return render_template('about.html', msg=get_model_summary())
 
 
 @app.route('/delete/<filename>')
