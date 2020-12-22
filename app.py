@@ -13,7 +13,7 @@ import numpy as np
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'I have a dream'
+app.config['SECRET_KEY'] = 'liveAI'
 app.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png']
@@ -21,45 +21,47 @@ app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png']
 
 CLASSES = [('No-Anomaly',
             ' Nominal solar module',
-            'static/no-anomaly.png'),
+            'static/no-anomaly.jpg'),
            ('Cell',
             'Hot spot occurring with square geometry in single cell',
-            'static/cell.png'),
+            'static/cell.jpg'),
            ('Cell-Multi',
             'Hot spots occurring with square geometry in multiple cells',
-            'static/cell-multi.png'),
+            'static/cell-multi.jpg'),
            ('Cracking',
             'Module anomaly caused by cracking on module surface',
-            'static/cracking.png'),
+            'static/cracking.jpg'),
            ('Hot-Spot',
             'Hot spot on a thin film module',
-            'static/hot-spot.png'),
+            'static/hot-spot.jpg'),
            ('Hot-Spot-Multi',
             'Multiple hot spots on a thin film module',
-            'static/hot-spot-multi.png'),
+            'static/hot-spot-multi.jpg'),
            ('Shadowing',
             'Sunlight obstructed by vegetation, man-made structures, or adjacent rows',
-            'static/shadowing.png'),
+            'static/shadowing.jpg'),
            ('Diode',
             'Activated bypass diode,'
             ' typically 1/3 of module',
-            'static/diode.png'),
+            'static/diode.jpg'),
            ('Diode-Multi',
             'Multiple activated bypass diodes, typically affecting 2/3 of module',
-            'static/diode-multi.png'),
+            'static/diode-multi.jpg'),
            ('Vegetation',
             'Panels blocked by vegetation',
-            'static/vegetation.png'),
+            'static/vegetation.jpg'),
            ('Soiling',
             'Dirt, dust, or other debris on surface of module',
-            'static/soiling.png'),
+            'static/soiling.jpg'),
            ('Offline-Module',
             'Entire module is heated',
-            'static/offline-module.png')]
+            'static/offline-module.jpg')]
 
 photos = UploadSet('photos', IMAGES)
 configure_uploads(app, photos)
 patch_request_class(app)
+
+last_uploaded = ''
 
 
 def recall(y_true, y_pred):
@@ -119,10 +121,15 @@ class UploadForm(FlaskForm):
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    global last_uploaded, err
     form = UploadForm()
     if request.method == 'POST':
-        request.files['file'].save(os.path.join(app.config['UPLOADED_PHOTOS_DEST'], request.files['file'].filename))
-        return redirect(url_for('upload_file'))
+        if request.files['file'].filename.lower().endswith(('.jpg', '.png')):
+            last_uploaded = request.files['file'].filename
+            request.files['file'].save(os.path.join(app.config['UPLOADED_PHOTOS_DEST'], last_uploaded))
+            return redirect(url_for('upload_file'))
+        else:
+            err = f'Invalid upload file: {request.files["file"].filename}'
 
     files_list = os.listdir(app.config['UPLOADED_PHOTOS_DEST'])
     file_urls = [photos.url(filename) for filename in files_list]
@@ -136,7 +143,7 @@ def home():
                            classes=CLASSES,
                            form=form,
                            files=zip(files_list, file_urls, predictions),
-                           old_files=zip(files_list, file_urls, predictions),
+                           last_uploaded=last_uploaded,
                            err=err)
 
 
