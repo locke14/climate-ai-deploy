@@ -149,6 +149,7 @@ font-size: x-small;
         </div>
     </div>
 </div>
+{% if last[0] != "" %}
 <div class="mdl-grid">
     <div class="mdl-layout-spacer"></div>
     <span class="mdl-card--border">
@@ -156,7 +157,6 @@ font-size: x-small;
 </span>
     <div class="mdl-layout-spacer"></div>
 </div>
-{% if last[0] != "" %}
 <div class="mdl-grid">
     <div class="mdl-layout-spacer"></div>
     <div class="mdl-cell mdl-cell--4-col  mdl-card mdl-shadow--2dp">
@@ -175,6 +175,15 @@ font-size: x-small;
     <div class="mdl-layout-spacer"></div>
 </div>
 {% endif %}
+<div class="mdl-grid">
+    <div class="mdl-layout-spacer"></div>
+    {% if err[1] == True %}
+        <span class="mdl-color--light-green-300">{{err[0]}}</span>
+    {% else %}
+        <span class="mdl-color--orange-300">{{err[0]}}</span>
+    {% endif %}
+    <div class="mdl-layout-spacer"></div>
+</div>
 <div class="mdl-grid">
     <div class="mdl-layout-spacer"></div>
     <span class="mdl-card--border">
@@ -204,14 +213,5 @@ font-size: x-small;
         </div>
     </div>
     {% endfor %}
-</div>
-<div class="mdl-grid">
-    <div class="mdl-layout-spacer"></div>
-    {% if err[1] == True %}
-        <span class="mdl-color--light-green-300">{{err[0]}}</span>
-    {% else %}
-        <span class="mdl-color--orange-300">{{err[0]}}</span>
-    {% endif %}
-    <div class="mdl-layout-spacer"></div>
 </div>
 {% endblock %}
