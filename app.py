@@ -136,6 +136,7 @@ def home():
                            classes=CLASSES,
                            form=form,
                            files=zip(files_list, file_urls, predictions),
+                           old_files=zip(files_list, file_urls, predictions),
                            err=err)
 
 
