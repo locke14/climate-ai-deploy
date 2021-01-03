@@ -121,6 +121,7 @@ def predict(input_file):
 
     im = load_img(input_file, color_mode='grayscale', target_size=(40, 24))
     arr = img_to_array(im).reshape((1, 40, 24, 1))
+    arr = arr/255.
     idx = np.argmax(model.predict(arr), axis=-1)
     return idx_to_class[idx[0]]
 
