@@ -148,7 +148,6 @@ def home():
             last_uploaded_url = photos.url(last_uploaded_file)
             last_uploaded_prediction = predict(os.path.join(app.config['UPLOADED_PHOTOS_DEST'], last_uploaded_file))
             err = (f'Successfully predicted file: {request.files["file"].filename}', True)
-            return redirect(url_for('home'))
         else:
             err = (f'Invalid upload file: {request.files["file"].filename}', False)
 
