@@ -62,9 +62,7 @@ photos = UploadSet('photos', IMAGES)
 configure_uploads(app, photos)
 patch_request_class(app)
 
-last_uploaded_file = ''
-last_uploaded_url = ''
-last_uploaded_prediction = ''
+results = []
 
 
 def recall(y_true, y_pred):
@@ -133,40 +131,27 @@ class UploadForm(FlaskForm):
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    global last_uploaded_file, last_uploaded_url, last_uploaded_prediction, err
+    global err, results
     form = UploadForm()
     if request.method == 'POST':
         if len(os.listdir(app.config['UPLOADED_PHOTOS_DEST'])) > 24:
-            err = (f'Exceeded number of files limit of 24. Delete some below and try again', False)
-            last_uploaded_file = ''
-            last_uploaded_url = ''
-            last_uploaded_prediction = ''
+            err = (f'Exceeded number of uploaded files. Delete some below and try again', False)
             return redirect(url_for('home'))
         if request.files['file'].filename.lower().endswith(('.jpg', '.png')):
-            request.files['file'].save(os.path.join(app.config['UPLOADED_PHOTOS_DEST'], request.files['file'].filename))
-            last_uploaded_file = request.files['file'].filename
-            last_uploaded_url = photos.url(last_uploaded_file)
-            last_uploaded_prediction = predict(os.path.join(app.config['UPLOADED_PHOTOS_DEST'], last_uploaded_file))
-            err = (f'Successfully predicted file: {request.files["file"].filename}', True)
+            f = request.files['file'].filename
+            request.files['file'].save(os.path.join(app.config['UPLOADED_PHOTOS_DEST'], f))
+            if model:
+                results.append((f, photos.url(f), predict(os.path.join(app.config['UPLOADED_PHOTOS_DEST'], f))))
+                err = (f'Successfully predicted file: {f}', True)
+            else:
+                err = (f'Model load failed', False)
         else:
             err = (f'Invalid upload file: {request.files["file"].filename}', False)
-
-    files_list = os.listdir(app.config['UPLOADED_PHOTOS_DEST'])
-    if last_uploaded_file in files_list:
-        files_list.remove(last_uploaded_file)
-
-    file_urls = [photos.url(filename) for filename in files_list]
-
-    if model:
-        predictions = [predict(os.path.join(app.config['UPLOADED_PHOTOS_DEST'], file_name)) for file_name in files_list]
-    else:
-        predictions = ['Unknown'] * len(files_list)
 
     return render_template('index.html',
                            classes=CLASSES,
                            form=form,
-                           files=zip(files_list, file_urls, predictions),
-                           last=(last_uploaded_file, last_uploaded_url, last_uploaded_prediction),
+                           results=results,
                            err=err)
 
 
